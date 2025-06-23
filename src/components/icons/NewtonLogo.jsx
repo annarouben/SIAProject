@@ -1,8 +1,8 @@
 const NewtonLogo = () => (
-  <img
-    src="/assets/img/newtonLogo.png"
+  <img 
+    src={import.meta.env.BASE_URL + 'assets/img/newtonLogo.png'}
     alt="Newton Logo"
-    className="h-8 w-8"
+    className="h-8 w-8" 
   />
 );
 
