@@ -16,6 +16,10 @@ const Contact = ({ contact }) => {
     }
   };
 
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  };
+
   return (
     <div className="bg-gray-800 rounded-lg p-4 shadow-lg hover:bg-gray-700 transition-colors flex items-center gap-4">
       <div className="relative">
@@ -31,11 +35,16 @@ const Contact = ({ contact }) => {
             <h3 className="text-lg font-semibold text-gray-100">{contact.name}</h3>
             <StarRating rating={contact.rating} />
           </div>
-          <button 
-            className="px-3 py-1 text-xs rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors"
-          >
-            {contact.goodAtTask}
-          </button>
+          <div className="group relative">
+            <button 
+              className="px-4 py-1 text-xs rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors w-24 truncate text-center"
+            >
+              {truncateText(contact.goodAtTask, 10)}
+            </button>
+            <div className="absolute hidden group-hover:block w-auto p-2 bg-gray-900 text-gray-300 text-xs rounded shadow-lg -bottom-8 right-0 whitespace-nowrap">
+              {contact.goodAtTask}
+            </div>
+          </div>
         </div>
         <div className="text-xs mt-1 text-gray-400 flex gap-8">
           <div>

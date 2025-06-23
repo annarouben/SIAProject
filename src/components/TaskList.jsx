@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTaskContext } from '../context/TaskContext';
+import SearchIcon from './icons/SearchIcon';
 import Task from './Task';
 
 const TaskList = () => {
@@ -15,13 +16,17 @@ const TaskList = () => {
     <div className="fixed right-0 top-16 w-[calc(100%-400px)] h-[calc(100vh-64px)] bg-gray-900 overflow-y-auto">
       <div className="p-6">
         <h2 className="text-xl font-bold text-gray-100 mb-4">Tasks</h2>
-        <div className="mb-6">
+        {/* Updated search container with icon */}
+        <div className="mb-6 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <SearchIcon />
+          </div>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tasks..."
-            className="w-full bg-gray-700 text-gray-300 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-600"
+            className="w-full bg-gray-700 text-gray-300 text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-600"
           />
         </div>
         <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
