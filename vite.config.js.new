@@ -11,12 +11,10 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
-    strictPort: false,
     hmr: {
-      overlay: true
+      overlay: false
     },
-    open: true,
-    cors: true
+    open: true
   },
   resolve: {
     alias: {

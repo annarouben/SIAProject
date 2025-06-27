@@ -4,6 +4,10 @@ import { INITIAL_TASKS, INITIAL_CHATS } from './data';
 const TaskContext = createContext();
 
 export function TaskProvider({ children }) {
+  console.log('TaskProvider initializing...');
+  console.log('INITIAL_TASKS:', INITIAL_TASKS);
+  console.log('INITIAL_CHATS:', INITIAL_CHATS);
+  
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [chats, setChats] = useState(INITIAL_CHATS);
 

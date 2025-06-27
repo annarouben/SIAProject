@@ -8,7 +8,7 @@ export const INITIAL_TASKS = [
     urgency: "Normal",
     assignee: {
       name: "Astrid",
-      avatar: "assets/img/persona/astrid.png"
+      avatar: "/assets/img/persona/astrid.png"
     }
   },
   {
@@ -20,7 +20,7 @@ export const INITIAL_TASKS = [
     urgency: "High Priority",
     assignee: {
       name: "Ben",
-      avatar: "assets/img/persona/ben.png"
+      avatar: "/assets/img/persona/ben.png"
     }
   },
   {
@@ -32,7 +32,7 @@ export const INITIAL_TASKS = [
     urgency: "Normal",
     assignee: {
       name: "Amber",
-      avatar: "assets/img/persona/amber.png"
+      avatar: "/assets/img/persona/amber.png"
     }
   },
   {
@@ -44,7 +44,7 @@ export const INITIAL_TASKS = [
     urgency: "Normal",
     assignee: {
       name: "Mina",
-      avatar: "assets/img/persona/mina.png"
+      avatar: "/assets/img/persona/mina.png"
     }
   },
   {
@@ -56,7 +56,7 @@ export const INITIAL_TASKS = [
     urgency: "High Priority",
     assignee: {
       name: "Sally",
-      avatar: "assets/img/persona/sally.png"
+      avatar: "/assets/img/persona/sally.png"
     }
   },
   {
@@ -68,7 +68,7 @@ export const INITIAL_TASKS = [
     urgency: "Low",
     assignee: {
       name: "Hugo",
-      avatar: "assets/img/persona/hugo.png"
+      avatar: "/assets/img/persona/hugo.png"
     }
   },
   {
@@ -80,7 +80,7 @@ export const INITIAL_TASKS = [
     urgency: "Normal",
     assignee: {
       name: "Ben",
-      avatar: "assets/img/persona/ben.png"
+      avatar: "/assets/img/persona/ben.png"
     }
   },
   {
@@ -92,7 +92,7 @@ export const INITIAL_TASKS = [
     urgency: "High Priority",
     assignee: {
       name: "Amber",
-      avatar: "assets/img/persona/amber.png"
+      avatar: "/assets/img/persona/amber.png"
     }
   }
 ];
@@ -103,7 +103,7 @@ export const INITIAL_CHATS = {
       id: 1,
       userId: 'astrid',
       userName: 'Astrid',
-      userAvatar: 'assets/img/persona/astrid.png',
+      userAvatar: '/assets/img/persona/astrid.png',
       text: "I've reviewed the quotes from Northern Mills. Their pricing is competitive but we should negotiate delivery terms.",
       timestamp: '2025-06-19T14:30:00Z'
     },
@@ -111,7 +111,7 @@ export const INITIAL_CHATS = {
       id: 2,
       userId: 'ben',
       userName: 'Ben',
-      userAvatar: 'assets/img/persona/ben.png',
+      userAvatar: '/assets/img/persona/ben.png',
       text: "Agreed. I'll schedule a call with their rep to discuss shipping costs.",
       timestamp: '2025-06-19T15:45:00Z'
     }
@@ -121,7 +121,7 @@ export const INITIAL_CHATS = {
       id: 3,
       userId: 'ben',
       userName: 'Ben',
-      userAvatar: 'assets/img/persona/ben.png',
+      userAvatar: '/assets/img/persona/ben.png',
       text: "First round of interviews completed. Three strong candidates identified.",
       timestamp: '2025-06-20T09:15:00Z'
     },
@@ -129,7 +129,7 @@ export const INITIAL_CHATS = {
       id: 4,
       userId: 'sally',
       userName: 'Sally',
-      userAvatar: 'assets/img/persona/sally.png',
+      userAvatar: '/assets/img/persona/sally.png',
       text: "Great! Let's schedule technical assessments for next week.",
       timestamp: '2025-06-20T10:30:00Z'
     }
@@ -139,7 +139,7 @@ export const INITIAL_CHATS = {
       id: 5,
       userId: 'sally',
       userName: 'Sally',
-      userAvatar: 'assets/img/persona/sally.png',
+      userAvatar: '/assets/img/persona/sally.png',
       text: "Portfolio review complete. Found two promising candidates with fintech experience.",
       timestamp: '2025-06-20T11:00:00Z'
     }

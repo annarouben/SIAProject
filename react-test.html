@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Minimal Test</title>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="module">
+    import React from 'https://esm.sh/react@18.2.0';
+    import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
+    
+    // Simple component
+    const App = () => {
+      return React.createElement('div', {
+        style: {
+          display: 'flex', 
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          height: '100vh',
+          fontFamily: 'sans-serif',
+          backgroundColor: '#282c34',
+          color: 'white'
+        }
+      }, 
+        React.createElement('h1', null, 'React is Working!'),
+        React.createElement('p', null, 'If you see this, React is rendering correctly.'),
+        React.createElement('button', {
+          onClick: () => alert('It works!'),
+          style: {
+            padding: '10px 20px',
+            backgroundColor: '#61dafb',
+            color: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            marginTop: '20px',
+            cursor: 'pointer'
+          }
+        }, 'Click Me')
+      );
+    };
+
+    // Render
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
