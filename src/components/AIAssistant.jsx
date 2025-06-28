@@ -35,6 +35,49 @@ const AIAssistant = ({ onClose }) => {
       sender: 'ai',
       text: 'Let me fetch your task list. In the meantime, did you know I can sort tasks faster than I can sort fruits? And that\'s saying something! 🍎✨',
       timestamp: '10:02 AM'
+    },
+    // Additional messages to test scrolling
+    {
+      id: 6,
+      sender: 'ai',
+      text: 'I see you have 3 high priority tasks that need your attention today. Would you like me to show those first?',
+      timestamp: '10:03 AM'
+    },
+    {
+      id: 7,
+      sender: 'user',
+      text: 'Yes, please show me the high priority tasks first.',
+      timestamp: '10:03 AM'
+    },
+    {
+      id: 8,
+      sender: 'ai',
+      text: 'Here are your high priority tasks:\n\n1. Complete quarterly report (due today)\n2. Review design mockups for client meeting\n3. Prepare presentation for tomorrow\'s team meeting',
+      timestamp: '10:04 AM'
+    },
+    {
+      id: 9,
+      sender: 'user',
+      text: 'Thanks! Can you help me organize these by estimated completion time?',
+      timestamp: '10:05 AM'
+    },
+    {
+      id: 10,
+      sender: 'ai',
+      text: 'Based on your past work patterns, here\'s how I\'d organize these tasks by estimated completion time:\n\n1. Review design mockups (30 mins)\n2. Prepare presentation (1.5 hours)\n3. Complete quarterly report (2.5 hours)\n\nWould you like to tackle them in this order?',
+      timestamp: '10:06 AM'
+    },
+    {
+      id: 11,
+      sender: 'user',
+      text: 'That sounds perfect. I\'ll start with the mockups right away.',
+      timestamp: '10:07 AM'
+    },
+    {
+      id: 12,
+      sender: 'ai',
+      text: 'Great choice! I\'ve marked "Review design mockups" as In Progress. Would you like me to set a reminder for when you should move to the next task?',
+      timestamp: '10:07 AM'
     }
   ]);
 
@@ -52,28 +95,44 @@ const AIAssistant = ({ onClose }) => {
     e.preventDefault();
     if (!userInput.trim()) return;
     // Add user message
-    setMessages([...messages, { sender: 'user', text: userInput }]);
+    setMessages([...messages, { 
+      id: messages.length + 1,
+      sender: 'user', 
+      text: userInput,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }]);
     
     // AI response (simplified for this example)
     setTimeout(() => {
       setMessages(prev => [...prev, { 
+        id: prev.length + 1,
         sender: 'ai', 
-        text: 'I\'m processing your request. This is a placeholder response.' 
+        text: 'I\'m processing your request. This is a placeholder response.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
     }, 1000);
     
     setUserInput('');
   };
 
+  // Add keyboard handler for Escape key
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   useEffect(() => {
     // Focus the sidebar when it opens
     sidebarRef.current?.focus();
-    // Add click outside listener
+    // Add click outside listener and keyboard listener
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
     
     // Cleanup listener on unmount
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [onClose]);
 
@@ -92,76 +151,90 @@ const AIAssistant = ({ onClose }) => {
   }, [messages]);
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-40">
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 flex justify-end">
       <div 
         ref={sidebarRef}
-        className="fixed right-0 top-0 w-96 h-screen bg-gray-800 border-l border-gray-700 shadow-xl z-50 flex flex-col"
+        className="w-96 h-screen bg-gray-800 border-l border-gray-700 shadow-xl z-50 flex flex-col"
+        tabIndex={0} // Make it focusable for keyboard events
       >
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <div 
-            ref={chatContainerRef}
-            className="flex-1 overflow-y-auto"
+        {/* Make sure the header is the first element and properly styled */}
+        <div className="bg-gray-700 p-4 border-b border-gray-600 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <img 
+              src={getImagePath('/assets/img/newtonLogo.png')}
+              alt="Newton" 
+              className="w-8 h-8 rounded-full"
+            />
+            <span className="font-medium text-white text-lg">Newton Assistant</span>
+          </div>
+          <button 
+            onClick={onClose}
+            className="text-gray-300 hover:text-white text-2xl bg-gray-600 hover:bg-gray-500 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+            aria-label="Close"
           >
-            <div className="p-4 space-y-4">
-              {messages.map((message, index) => (
-                <div 
-                  key={index}
-                  className={`flex mb-4 ${message.sender === 'ai' ? 'justify-start' : 'justify-end'}`}
-                >
-                  {message.sender === 'ai' && (
-                    <div className="w-8 h-8 mr-2 flex-shrink-0">
-                      <img 
-                        src={getImagePath('/assets/img/newtonLogo.png')} 
-                        alt="AI" 
-                        className="w-full h-full rounded-full"
-                      />
-                    </div>
-                  )}
-                  <div className={`max-w-[80%] rounded-lg p-3 ${
-                    message.sender === 'user' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-700 text-gray-300'
-                  }`}>
-                    <p className="text-sm">{message.text}</p>
-                    <span className="text-xs opacity-75 mt-1 block">
-                      {message.timestamp}
-                    </span>
+            ✕
+          </button>
+        </div>
+
+        {/* Chat container */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4 space-y-4">
+            {messages.map((message, index) => (
+              <div 
+                key={index}
+                className={`flex mb-4 ${message.sender === 'ai' ? 'justify-start' : 'justify-end'}`}
+              >
+                {message.sender === 'ai' && (
+                  <div className="w-8 h-8 mr-2 flex-shrink-0">
+                    <img 
+                      src={getImagePath('/assets/img/newtonLogo.png')} 
+                      alt="AI" 
+                      className="w-full h-full rounded-full"
+                    />
                   </div>
-                  {message.sender === 'user' && (
-                    <div className="w-8 h-8 ml-2 flex-shrink-0">
-                      <img 
-                        src="/assets/img/persona/mina.png"
-                        alt="Mina"
-                        className="w-full h-full rounded-full"
-                      />
-                    </div>
-                  )}
+                )}
+                <div className={`max-w-[80%] rounded-lg p-3 ${
+                  message.sender === 'user' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-700 text-gray-300'
+                }`}>
+                  <p className="text-sm whitespace-pre-line">{message.text}</p>
+                  <span className="text-xs opacity-75 mt-1 block">
+                    {message.timestamp}
+                  </span>
                 </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
+                {message.sender === 'user' && (
+                  <div className="w-8 h-8 ml-2 flex-shrink-0">
+                    <img 
+                      src={getImagePath('/assets/img/persona/mina.png')}
+                      alt="Mina"
+                      className="w-full h-full rounded-full"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
         </div>
 
-        {/* Keep the input form */}
-        <div className="mt-auto border-t border-gray-700">
-          <form onSubmit={handleSubmit} className="p-4">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-600"
-              />
-              <button
-                type="submit"
-                className="bg-gray-700 text-gray-300 hover:text-gray-100 p-3 rounded-lg hover:bg-gray-600 flex items-center justify-center"
-                aria-label="Send message"
-              >
-                <SendIcon />
-              </button>
-            </div>
+        {/* Input form */}
+        <div className="border-t border-gray-700 p-4">
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <input
+              type="text"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-600"
+            />
+            <button
+              type="submit"
+              className="bg-gray-700 text-gray-300 hover:text-gray-100 p-3 rounded-lg hover:bg-gray-600 flex items-center justify-center"
+              aria-label="Send message"
+            >
+              <SendIcon />
+            </button>
           </form>
         </div>
       </div>
