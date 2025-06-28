@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { getImagePath } from '../utils/imagePath';
 import NewtonLogo from './icons/NewtonLogo';
 import SendIcon from './icons/SendIcon';
 
 const AIAssistant = ({ onClose }) => {
   const [userInput, setUserInput] = useState('');
-  
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -40,6 +40,7 @@ const AIAssistant = ({ onClose }) => {
 
   const sidebarRef = useRef(null);
   const chatContainerRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   const handleClickOutside = (e) => {
     if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
@@ -50,7 +51,17 @@ const AIAssistant = ({ onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!userInput.trim()) return;
-    // Handle chat submission here
+    // Add user message
+    setMessages([...messages, { sender: 'user', text: userInput }]);
+    
+    // AI response (simplified for this example)
+    setTimeout(() => {
+      setMessages(prev => [...prev, { 
+        sender: 'ai', 
+        text: 'I\'m processing your request. This is a placeholder response.' 
+      }]);
+    }, 1000);
+    
     setUserInput('');
   };
 
@@ -76,6 +87,10 @@ const AIAssistant = ({ onClose }) => {
     }
   }, []);
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-40">
       <div 
@@ -88,16 +103,16 @@ const AIAssistant = ({ onClose }) => {
             className="flex-1 overflow-y-auto"
           >
             <div className="p-4 space-y-4">
-              {messages.map(message => (
+              {messages.map((message, index) => (
                 <div 
-                  key={message.id}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  key={index}
+                  className={`flex mb-4 ${message.sender === 'ai' ? 'justify-start' : 'justify-end'}`}
                 >
                   {message.sender === 'ai' && (
                     <div className="w-8 h-8 mr-2 flex-shrink-0">
                       <img 
-                        src="/assets/img/newtonLogo.png"
-                        alt="Newton"
+                        src={getImagePath('/assets/img/newtonLogo.png')} 
+                        alt="AI" 
                         className="w-full h-full rounded-full"
                       />
                     </div>
@@ -123,6 +138,7 @@ const AIAssistant = ({ onClose }) => {
                   )}
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
           </div>
         </div>
