@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import CogIcon from './icons/CogIcon';
 import AIAssistant from './AIAssistant';
+import { getImagePath } from '../utils/imagePath';
 
 const Navbar = () => {
   const [showAIAssistant, setShowAIAssistant] = useState(false);
@@ -25,7 +26,7 @@ const Navbar = () => {
                 className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
               >
                 <img 
-                  src="/assets/img/newtonLogo.png" 
+                  src={getImagePath('/assets/img/newtonLogo.png')}
                   alt="AI Assistant"
                   className="w-6 h-6"
                 />
