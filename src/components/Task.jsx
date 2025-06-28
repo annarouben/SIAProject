@@ -2,6 +2,19 @@ import { useState, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import TaskChat from './TaskChat';
 
+// Create a utility function to handle image paths
+const getImagePath = (imagePath) => {
+  // Get base URL from Vite's environment variables
+  const base = import.meta.env.MODE === 'development' ? '' : '/SIAProject';
+  
+  // If the path already starts with http/https, it's an external URL
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  }
+  
+  // Otherwise, prepend the base path
+  return `${base}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
 
 const Task = ({ task }) => {
   const [showUrgencyDropdown, setShowUrgencyDropdown] = useState(false);
@@ -106,7 +119,7 @@ const Task = ({ task }) => {
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center">
             <img 
-              src={task.assignee.avatar} 
+              src={getImagePath(task.assignee.avatar)}
               alt={task.assignee.name}
               className="w-8 h-8 rounded-full"
             />
