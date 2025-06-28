@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from 'date-fns';
+import { getImagePath } from '../utils/imagePath';
 
 const ChatThread = ({ messages = [] }) => {
   if (!messages || messages.length === 0) {
@@ -14,7 +15,7 @@ const ChatThread = ({ messages = [] }) => {
       {messages.map((message) => (
         <div key={message.id} className="flex items-start gap-3">
           <img
-            src={message.userAvatar}
+            src={getImagePath(message.userAvatar)}
             alt={message.userName}
             className="w-8 h-8 rounded-full object-cover"
           />

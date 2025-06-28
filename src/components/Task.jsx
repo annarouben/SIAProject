@@ -1,20 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
-import TaskChat from './TaskChat';
-
-// Create a utility function to handle image paths
-const getImagePath = (imagePath) => {
-  // Get base URL from Vite's environment variables
-  const base = import.meta.env.MODE === 'development' ? '' : '/SIAProject';
-  
-  // If the path already starts with http/https, it's an external URL
-  if (imagePath.startsWith('http')) {
-    return imagePath;
-  }
-  
-  // Otherwise, prepend the base path
-  return `${base}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
-};
+import { getImagePath } from '../utils/imagePath';
+import ChatThread from './ChatThread'; // Import ChatThread
 
 const Task = ({ task }) => {
   const [showUrgencyDropdown, setShowUrgencyDropdown] = useState(false);
@@ -113,6 +100,9 @@ const Task = ({ task }) => {
     setShowChat(!showChat);
   };
 
+  // Get chat messages for this task
+  const taskMessages = chats[task.id] || [];
+
   return (
     <>
       <tr className="hover:bg-gray-700">
@@ -198,7 +188,23 @@ const Task = ({ task }) => {
       {showChat && (
         <tr>
           <td colSpan="6" className="bg-gray-800">
-            <TaskChat taskId={task.id} />
+            <div className="bg-gray-800 p-4">
+              <ChatThread messages={taskMessages} />
+              
+              {/* Add comment input */}
+              <div className="mt-4 flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Add a comment..."
+                  className="flex-1 bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                />
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors"
+                >
+                  Post
+                </button>
+              </div>
+            </div>
           </td>
         </tr>
       )}
