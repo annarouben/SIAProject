@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { getImagePath } from '../utils/imagePath';
 import SendIcon from './icons/SendIcon';
+import PurchaseOrder from './PurchaseOrder';  // Import the PurchaseOrder component
 
 const AIAssistant = ({ onClose }) => {
   const [userInput, setUserInput] = useState('');
-  const [isCommandsOpen, setIsCommandsOpen] = useState(false); // Add state for commands visibility
+  const [isCommandsOpen, setIsCommandsOpen] = useState(false);
+  const [activeComponent, setActiveComponent] = useState(null); // State to track active component
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -105,7 +107,7 @@ const AIAssistant = ({ onClose }) => {
 
   // Common tasks that users might want to initiate
   const commonTasks = [
-    { id: 1, name: 'Purchase Order', prompt: 'Help me create a purchase order' },
+    { id: 1, name: 'Purchase Order', prompt: 'Help me create a purchase order', component: 'PurchaseOrder' },
     { id: 2, name: 'Schedule Meeting', prompt: 'I need to schedule a team meeting' },
     { id: 3, name: 'Task Priority', prompt: 'Help me prioritize my tasks for today' },
     { id: 4, name: 'Find Document', prompt: 'I need to find a document' }
@@ -147,10 +149,40 @@ const AIAssistant = ({ onClose }) => {
     setUserInput('');
   };
 
-  // Handle clicking on a common task button
-  const handleTaskClick = (prompt) => {
+  // Handle clicking on a common task button with enhanced component display
+  const handleTaskClick = (prompt, component) => {
     sendMessage(prompt);
     setIsCommandsOpen(false); // Close commands after selecting one
+    
+    // If this task has an associated component, activate it
+    if (component === 'PurchaseOrder') {
+      // Add a specific AI response for purchase order
+      setTimeout(() => {
+        setMessages(prev => [...prev, { 
+          id: prev.length + 1,
+          sender: 'ai', 
+          text: "I'll help you create a purchase order. I've opened the form for you below. Please fill in the details and I'll assist you with completing the process.",
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }]);
+        
+        // Set the active component
+        setActiveComponent('PurchaseOrder');
+      }, 1500);
+    }
+  };
+
+  // Function to handle purchase order submission
+  const handlePurchaseOrderSubmit = (formData) => {
+    // Add a message showing the purchase order was created
+    setMessages(prev => [...prev, { 
+      id: prev.length + 1,
+      sender: 'ai', 
+      text: `✅ Purchase Order #${formData.orderNumber || 'PO-' + Math.floor(Math.random() * 10000)} has been created successfully for ${formData.vendor || 'the specified vendor'}. The order has been sent for approval.`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }]);
+    
+    // Close the purchase order form
+    setActiveComponent(null);
   };
 
   // Toggle commands visibility
@@ -161,7 +193,12 @@ const AIAssistant = ({ onClose }) => {
   // Add keyboard handler for Escape key
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
-      onClose();
+      // If there's an active component, close it first
+      if (activeComponent) {
+        setActiveComponent(null);
+      } else {
+        onClose();
+      }
     }
   };
 
@@ -177,19 +214,10 @@ const AIAssistant = ({ onClose }) => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClose]);
+  }, [onClose, activeComponent]);
 
   useEffect(() => {
-    // Scroll to bottom when component mounts
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
-
-  useEffect(() => {
+    // Scroll to bottom when component mounts or messages update
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -254,6 +282,22 @@ const AIAssistant = ({ onClose }) => {
               </div>
             ))}
             <div ref={messagesEndRef} />
+            
+            {/* Display active component if exists */}
+            {activeComponent === 'PurchaseOrder' && (
+              <div className="mb-4 mt-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-white font-medium">Create Purchase Order</h3>
+                  <button 
+                    onClick={() => setActiveComponent(null)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <PurchaseOrder onSubmit={handlePurchaseOrderSubmit} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -300,7 +344,7 @@ const AIAssistant = ({ onClose }) => {
                 {commonTasks.map(task => (
                   <button
                     key={task.id}
-                    onClick={() => handleTaskClick(task.prompt)}
+                    onClick={() => handleTaskClick(task.prompt, task.component)}
                     className="text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white py-1 px-3 rounded-full transition-colors"
                   >
                     {task.name}
