@@ -7,6 +7,10 @@ const PurchaseOrder = ({ onSubmit }) => {
     amount: '',
     description: '',
     date: new Date().toISOString().split('T')[0],
+    assignTo: '',
+    urgency: 'medium',
+    dueBy: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default 7 days from now
+    observers: '',
   });
 
   const handleChange = (e) => {
@@ -18,6 +22,14 @@ const PurchaseOrder = ({ onSubmit }) => {
     e.preventDefault();
     onSubmit(formData);
   };
+
+  // Team members for dropdown
+  const teamMembers = [
+    { id: 1, name: 'Mina Chen', role: 'Project Manager' },
+    { id: 2, name: 'David Rodriguez', role: 'Financial Analyst' },
+    { id: 3, name: 'Sarah Johnson', role: 'Procurement Specialist' },
+    { id: 4, name: 'Alex Patel', role: 'Department Head' },
+  ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
@@ -88,6 +100,108 @@ const PurchaseOrder = ({ onSubmit }) => {
             min="0"
           />
         </div>
+      </div>
+
+      {/* New field: Assign To */}
+      <div>
+        <label htmlFor="assignTo" className="block text-xs text-gray-400 mb-1">
+          Assign To
+        </label>
+        <select
+          id="assignTo"
+          name="assignTo"
+          value={formData.assignTo}
+          onChange={handleChange}
+          className="w-full bg-gray-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          required
+        >
+          <option value="">Select a team member</option>
+          {teamMembers.map(member => (
+            <option key={member.id} value={member.name}>
+              {member.name} ({member.role})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* New field: Urgency */}
+      <div>
+        <label htmlFor="urgency" className="block text-xs text-gray-400 mb-1">
+          Urgency
+        </label>
+        <div className="flex gap-3">
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="urgency"
+              value="low"
+              checked={formData.urgency === 'low'}
+              onChange={handleChange}
+              className="text-blue-600 focus:ring-blue-500 h-4 w-4 mr-1"
+            />
+            <span className="text-sm text-gray-300">Low</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="urgency"
+              value="medium"
+              checked={formData.urgency === 'medium'}
+              onChange={handleChange}
+              className="text-blue-600 focus:ring-blue-500 h-4 w-4 mr-1"
+            />
+            <span className="text-sm text-gray-300">Medium</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="urgency"
+              value="high"
+              checked={formData.urgency === 'high'}
+              onChange={handleChange}
+              className="text-blue-600 focus:ring-blue-500 h-4 w-4 mr-1"
+            />
+            <span className="text-sm text-gray-300">High</span>
+          </label>
+        </div>
+      </div>
+
+      {/* New field: Due By */}
+      <div>
+        <label htmlFor="dueBy" className="block text-xs text-gray-400 mb-1">
+          Due By
+        </label>
+        <input
+          type="date"
+          id="dueBy"
+          name="dueBy"
+          value={formData.dueBy}
+          onChange={handleChange}
+          className="w-full bg-gray-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          required
+        />
+      </div>
+
+      {/* Modified Observers field */}
+      <div>
+        <label htmlFor="observers" className="block text-xs text-gray-400 mb-1">
+          Observers (select additional users to notify)
+        </label>
+        <select
+          id="observers"
+          name="observers"
+          value={formData.observers}
+          onChange={handleChange}
+          className="w-full bg-gray-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          multiple
+        >
+          {teamMembers.map(member => (
+            <option key={member.id} value={member.name}>
+              {member.name} ({member.role})
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple users</p>
       </div>
 
       <div>
