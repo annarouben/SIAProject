@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { getImagePath } from '../utils/imagePath';
-import NewtonLogo from './icons/NewtonLogo';
 import SendIcon from './icons/SendIcon';
 
 const AIAssistant = ({ onClose }) => {
@@ -129,7 +128,7 @@ const AIAssistant = ({ onClose }) => {
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
     
-    // Cleanup listener on unmount
+    // Cleanup listeners on unmount
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
@@ -154,30 +153,26 @@ const AIAssistant = ({ onClose }) => {
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 flex justify-end">
       <div 
         ref={sidebarRef}
-        className="w-96 h-screen bg-gray-800 border-l border-gray-700 shadow-xl z-50 flex flex-col"
-        tabIndex={0} // Make it focusable for keyboard events
+        className="w-96 bg-gray-800 border-l border-gray-700 shadow-xl z-50 flex flex-col mt-16 h-[calc(100vh-64px)]"
+        tabIndex={0}
       >
-        {/* Make sure the header is the first element and properly styled */}
-        <div className="bg-gray-700 p-4 border-b border-gray-600 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img 
-              src={getImagePath('/assets/img/newtonLogo.png')}
-              alt="Newton" 
-              className="w-8 h-8 rounded-full"
-            />
-            <span className="font-medium text-white text-lg">Newton Assistant</span>
-          </div>
+        {/* Small compact header with title and close button */}
+        <div className="bg-gray-700 py-2 px-4 border-b border-gray-600 flex items-center justify-between">
+          <span className="font-medium text-white text-sm">AI Assistant</span>
           <button 
             onClick={onClose}
-            className="text-gray-300 hover:text-white text-2xl bg-gray-600 hover:bg-gray-500 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+            className="text-gray-300 hover:text-white text-lg bg-gray-600 hover:bg-gray-500 rounded-full w-6 h-6 flex items-center justify-center transition-colors"
             aria-label="Close"
           >
             ✕
           </button>
         </div>
 
-        {/* Chat container */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Chat container without the sticky close button */}
+        <div 
+          ref={chatContainerRef}
+          className="flex-1 overflow-y-auto"
+        >
           <div className="p-4 space-y-4">
             {messages.map((message, index) => (
               <div 
@@ -218,7 +213,7 @@ const AIAssistant = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Input form */}
+        {/* Input form remains the same */}
         <div className="border-t border-gray-700 p-4">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <input
