@@ -4,6 +4,7 @@ import SendIcon from './icons/SendIcon';
 
 const AIAssistant = ({ onClose }) => {
   const [userInput, setUserInput] = useState('');
+  const [isCommandsOpen, setIsCommandsOpen] = useState(false); // Add state for commands visibility
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -80,9 +81,35 @@ const AIAssistant = ({ onClose }) => {
     }
   ]);
 
+  // Define the ChevronDownIcon using the same SVG from Task.jsx
+  const ChevronDownIcon = (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 20 20" 
+      fill="currentColor" 
+      className={`w-4 h-4 transition-transform duration-200 ${
+        isCommandsOpen ? 'transform rotate-180' : ''
+      }`}
+    >
+      <path 
+        fillRule="evenodd" 
+        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" 
+        clipRule="evenodd" 
+      />
+    </svg>
+  );
+
   const sidebarRef = useRef(null);
   const chatContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
+
+  // Common tasks that users might want to initiate
+  const commonTasks = [
+    { id: 1, name: 'Purchase Order', prompt: 'Help me create a purchase order' },
+    { id: 2, name: 'Schedule Meeting', prompt: 'I need to schedule a team meeting' },
+    { id: 3, name: 'Task Priority', prompt: 'Help me prioritize my tasks for today' },
+    { id: 4, name: 'Find Document', prompt: 'I need to find a document' }
+  ];
 
   const handleClickOutside = (e) => {
     if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
@@ -93,11 +120,17 @@ const AIAssistant = ({ onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!userInput.trim()) return;
+    
+    sendMessage(userInput);
+  };
+
+  // Function to handle sending a message - extracted for reuse
+  const sendMessage = (text) => {
     // Add user message
-    setMessages([...messages, { 
-      id: messages.length + 1,
+    setMessages(prev => [...prev, { 
+      id: prev.length + 1,
       sender: 'user', 
-      text: userInput,
+      text: text,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }]);
     
@@ -106,12 +139,23 @@ const AIAssistant = ({ onClose }) => {
       setMessages(prev => [...prev, { 
         id: prev.length + 1,
         sender: 'ai', 
-        text: 'I\'m processing your request. This is a placeholder response.',
+        text: `I'm processing your request: "${text}". This is a placeholder response.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
     }, 1000);
     
     setUserInput('');
+  };
+
+  // Handle clicking on a common task button
+  const handleTaskClick = (prompt) => {
+    sendMessage(prompt);
+    setIsCommandsOpen(false); // Close commands after selecting one
+  };
+
+  // Toggle commands visibility
+  const toggleCommands = () => {
+    setIsCommandsOpen(prev => !prev);
   };
 
   // Add keyboard handler for Escape key
@@ -168,7 +212,7 @@ const AIAssistant = ({ onClose }) => {
           </button>
         </div>
 
-        {/* Chat container without the sticky close button */}
+        {/* Chat container */}
         <div 
           ref={chatContainerRef}
           className="flex-1 overflow-y-auto"
@@ -213,24 +257,58 @@ const AIAssistant = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Input form remains the same */}
-        <div className="border-t border-gray-700 p-4">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-600"
-            />
-            <button
-              type="submit"
-              className="bg-gray-700 text-gray-300 hover:text-gray-100 p-3 rounded-lg hover:bg-gray-600 flex items-center justify-center"
-              aria-label="Send message"
-            >
-              <SendIcon />
-            </button>
+        {/* Input form and collapsible quick commands section */}
+        <div className="border-t border-gray-700">
+          {/* Input form */}
+          <form onSubmit={handleSubmit} className="p-4">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder="Type your message..."
+                className="flex-1 bg-gray-700 text-gray-100 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-600"
+              />
+              <button
+                type="submit"
+                className="bg-gray-700 text-gray-300 hover:text-gray-100 p-3 rounded-lg hover:bg-gray-600 flex items-center justify-center"
+                aria-label="Send message"
+              >
+                <SendIcon />
+              </button>
+            </div>
           </form>
+          
+          {/* Collapsible common tasks section */}
+          <div className="px-4 pb-4">
+            {/* Header with toggle button */}
+            <button 
+              onClick={toggleCommands}
+              className="flex items-center justify-between w-full mb-2 text-xs text-gray-400 font-medium hover:text-gray-300"
+            >
+              <span>QUICK COMMANDS</span>
+              {ChevronDownIcon}
+            </button>
+            
+            {/* Quick commands content - conditionally shown */}
+            <div 
+              className={`transition-all duration-300 overflow-hidden ${
+                isCommandsOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+              }`}
+            >
+              <div className="flex flex-wrap gap-2 pt-1">
+                {commonTasks.map(task => (
+                  <button
+                    key={task.id}
+                    onClick={() => handleTaskClick(task.prompt)}
+                    className="text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white py-1 px-3 rounded-full transition-colors"
+                  >
+                    {task.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
