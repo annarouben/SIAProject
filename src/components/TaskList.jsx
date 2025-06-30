@@ -1,11 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import SearchIcon from './icons/SearchIcon';
 import Task from './Task';
 
 const TaskList = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [contactsExpanded, setContactsExpanded] = useState(true);
   const { tasks } = useTaskContext();
+
+  useEffect(() => {
+    // Listen for changes to the contacts panel
+    const handleResize = (e) => {
+      setContactsExpanded(e.detail.isExpanded);
+    };
+
+    window.addEventListener('contactsPanelResize', handleResize);
+    
+    // Get initial state
+    const contactsWidth = getComputedStyle(document.documentElement)
+      .getPropertyValue('--contacts-panel-width');
+    setContactsExpanded(contactsWidth === '400px');
+
+    return () => {
+      window.removeEventListener('contactsPanelResize', handleResize);
+    };
+  }, []);
 
   const filteredTasks = tasks.filter(task => 
     task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -13,7 +32,12 @@ const TaskList = () => {
   );
 
   return (
-    <div className="fixed right-0 top-16 w-[calc(100%-400px)] h-[calc(100vh-64px)] bg-gray-900 overflow-y-auto">
+    <div 
+      className="fixed right-0 top-16 h-[calc(100vh-64px)] bg-gray-900 overflow-y-auto transition-all duration-300" 
+      style={{ 
+        width: `calc(100% - var(--contacts-panel-width, 400px))` 
+      }}
+    >
       <div className="p-6">
         <h2 className="text-xl font-bold text-gray-100 mb-4">Tasks</h2>
         {/* Updated search container with icon */}

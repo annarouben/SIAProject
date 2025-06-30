@@ -18,9 +18,6 @@ const Navbar = () => {
               <a href="#" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                 Dashboard
               </a>
-              <a href="#" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                Tasks
-              </a>
               <button 
                 onClick={() => setShowAIAssistant(true)}
                 className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
