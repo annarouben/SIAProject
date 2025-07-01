@@ -21,6 +21,19 @@ const PurchaseOrder = ({ onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
+    
+    // Reset form with new order number after submission
+    setFormData({
+      orderNumber: `PO-${Math.floor(10000 + Math.random() * 90000)}`,
+      vendor: '',
+      amount: '',
+      description: '',
+      date: new Date().toISOString().split('T')[0],
+      assignTo: '',
+      urgency: 'medium',
+      dueBy: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      observers: '',
+    });
   };
 
   // Team members for dropdown
@@ -31,13 +44,21 @@ const PurchaseOrder = ({ onSubmit }) => {
     { id: 4, name: 'Alex Patel', role: 'Department Head' },
   ];
 
+  // Helper component for form labels with required indicator
+  const FormLabel = ({ htmlFor, required, children }) => (
+    <label htmlFor={htmlFor} className="block text-xs text-gray-400 mb-1">
+      {required && <span className="text-red-500 mr-1">*</span>}
+      {children}
+    </label>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="orderNumber" className="block text-xs text-gray-400 mb-1">
+          <FormLabel htmlFor="orderNumber">
             Order Number
-          </label>
+          </FormLabel>
           <input
             type="text"
             id="orderNumber"
@@ -49,9 +70,9 @@ const PurchaseOrder = ({ onSubmit }) => {
           />
         </div>
         <div>
-          <label htmlFor="date" className="block text-xs text-gray-400 mb-1">
+          <FormLabel htmlFor="date" required>
             Date
-          </label>
+          </FormLabel>
           <input
             type="date"
             id="date"
@@ -59,14 +80,15 @@ const PurchaseOrder = ({ onSubmit }) => {
             value={formData.date}
             onChange={handleChange}
             className="w-full bg-gray-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="vendor" className="block text-xs text-gray-400 mb-1">
+        <FormLabel htmlFor="vendor">
           Vendor
-        </label>
+        </FormLabel>
         <input
           type="text"
           id="vendor"
@@ -75,14 +97,13 @@ const PurchaseOrder = ({ onSubmit }) => {
           onChange={handleChange}
           placeholder="Enter vendor name"
           className="w-full bg-gray-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          required
         />
       </div>
 
       <div>
-        <label htmlFor="amount" className="block text-xs text-gray-400 mb-1">
+        <FormLabel htmlFor="amount">
           Amount
-        </label>
+        </FormLabel>
         <div className="relative">
           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
             $
@@ -95,18 +116,16 @@ const PurchaseOrder = ({ onSubmit }) => {
             onChange={handleChange}
             placeholder="0.00"
             className="w-full bg-gray-600 text-white text-sm rounded pl-7 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            required
             step="0.01"
             min="0"
           />
         </div>
       </div>
 
-      {/* New field: Assign To */}
       <div>
-        <label htmlFor="assignTo" className="block text-xs text-gray-400 mb-1">
+        <FormLabel htmlFor="assignTo" required>
           Assign To
-        </label>
+        </FormLabel>
         <select
           id="assignTo"
           name="assignTo"
@@ -124,11 +143,10 @@ const PurchaseOrder = ({ onSubmit }) => {
         </select>
       </div>
 
-      {/* New field: Urgency */}
       <div>
-        <label htmlFor="urgency" className="block text-xs text-gray-400 mb-1">
+        <FormLabel htmlFor="urgency" required>
           Urgency
-        </label>
+        </FormLabel>
         <div className="flex gap-3">
           <label className="inline-flex items-center">
             <input
@@ -138,6 +156,7 @@ const PurchaseOrder = ({ onSubmit }) => {
               checked={formData.urgency === 'low'}
               onChange={handleChange}
               className="text-blue-600 focus:ring-blue-500 h-4 w-4 mr-1"
+              required
             />
             <span className="text-sm text-gray-300">Low</span>
           </label>
@@ -166,11 +185,10 @@ const PurchaseOrder = ({ onSubmit }) => {
         </div>
       </div>
 
-      {/* New field: Due By */}
       <div>
-        <label htmlFor="dueBy" className="block text-xs text-gray-400 mb-1">
+        <FormLabel htmlFor="dueBy" required>
           Due By
-        </label>
+        </FormLabel>
         <input
           type="date"
           id="dueBy"
@@ -182,11 +200,10 @@ const PurchaseOrder = ({ onSubmit }) => {
         />
       </div>
 
-      {/* Modified Observers field */}
       <div>
-        <label htmlFor="observers" className="block text-xs text-gray-400 mb-1">
+        <FormLabel htmlFor="observers">
           Observers (select additional users to notify)
-        </label>
+        </FormLabel>
         <select
           id="observers"
           name="observers"
@@ -205,9 +222,9 @@ const PurchaseOrder = ({ onSubmit }) => {
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-xs text-gray-400 mb-1">
+        <FormLabel htmlFor="description">
           Description
-        </label>
+        </FormLabel>
         <textarea
           id="description"
           name="description"
@@ -215,17 +232,19 @@ const PurchaseOrder = ({ onSubmit }) => {
           onChange={handleChange}
           placeholder="Enter purchase details"
           className="w-full bg-gray-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[80px]"
-          required
         />
       </div>
 
-      <div className="flex justify-end pt-2">
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded transition-colors"
-        >
-          Create Purchase Order
-        </button>
+      <div className="pt-2">
+        <p className="text-xs text-gray-400 mb-2"><span className="text-red-500">*</span> Required fields</p>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded transition-colors"
+          >
+            Create Purchase Order
+          </button>
+        </div>
       </div>
     </form>
   );
