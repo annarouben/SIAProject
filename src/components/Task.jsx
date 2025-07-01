@@ -1,25 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import { getImagePath } from '../utils/imagePath';
-import ChatThread from './ChatThread'; // Import ChatThread
+import ChatThread from './ChatThread';
 
 const Task = ({ task }) => {
+  // Add null check for task prop
+  if (!task) {
+    console.error('Task component received null or undefined task');
+    return null;
+  }
+
   const [showUrgencyDropdown, setShowUrgencyDropdown] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const { updateTaskUrgency, chats } = useTaskContext();
-
+  const [isNewTask, setIsNewTask] = useState(false);
+  const { updateTaskUrgency, chats = {} } = useTaskContext();
+  
+  // Check if this is a new purchase order and set animation flag
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showUrgencyDropdown) {
-        setShowUrgencyDropdown(false);
+    if (task.type === 'Purchase Order' && task.createdAt) {
+      const creationTime = new Date(task.createdAt).getTime();
+      const isNew = creationTime > Date.now() - 5000; // 5 seconds
+      setIsNewTask(isNew);
+      
+      // Remove the highlight after animation completes
+      if (isNew) {
+        const timer = setTimeout(() => {
+          setIsNewTask(false);
+        }, 2000); // Animation duration
+        return () => clearTimeout(timer);
       }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showUrgencyDropdown]);
+    }
+  }, [task]);
 
   const getUrgencyColor = (urgency) => {
     switch (urgency) {
@@ -105,7 +116,11 @@ const Task = ({ task }) => {
 
   return (
     <>
-      <tr className="hover:bg-gray-700">
+      <tr 
+        className={`hover:bg-gray-700 ${
+          isNewTask ? 'animate-new-task' : ''
+        }`}
+      >
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center">
             <img 

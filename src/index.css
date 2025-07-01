@@ -6,3 +6,24 @@
 :root {
   --contacts-panel-width: 400px;
 }
+
+/* Add this to the end of your CSS file */
+
+@keyframes highlightNew {
+  0% {
+    background-color: rgba(59, 130, 246, 0.5); /* blue-500 with 50% opacity */
+    transform: translateY(-4px);
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.3); /* blue-500 with 30% opacity */
+    transform: translateY(0);
+  }
+  100% {
+    background-color: transparent;
+    transform: translateY(0);
+  }
+}
+
+.animate-new-task {
+  animation: highlightNew 2s ease-in-out;
+}

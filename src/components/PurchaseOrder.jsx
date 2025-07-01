@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { useTaskContext } from '../context/TaskContext';
+import { INITIAL_TASKS } from '../context/data'; // Import to get contact data
 
 const PurchaseOrder = ({ onSubmit }) => {
+  const { addPurchaseOrder } = useTaskContext();
   const [formData, setFormData] = useState({
     orderNumber: `PO-${Math.floor(10000 + Math.random() * 90000)}`,
     vendor: '',
@@ -20,7 +23,14 @@ const PurchaseOrder = ({ onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Add to task list via context
+    const newTask = addPurchaseOrder(formData);
+    
+    // Call onSubmit for any additional processing
+    if (onSubmit) {
+      onSubmit(formData);
+    }
     
     // Reset form with new order number after submission
     setFormData({
@@ -36,13 +46,16 @@ const PurchaseOrder = ({ onSubmit }) => {
     });
   };
 
-  // Team members for dropdown
-  const teamMembers = [
-    { id: 1, name: 'Mina Chen', role: 'Project Manager' },
-    { id: 2, name: 'David Rodriguez', role: 'Financial Analyst' },
-    { id: 3, name: 'Sarah Johnson', role: 'Procurement Specialist' },
-    { id: 4, name: 'Alex Patel', role: 'Department Head' },
-  ];
+  // Extract unique contacts from INITIAL_TASKS
+  const uniqueContacts = [...new Map(
+    INITIAL_TASKS.map(task => [
+      task.assignee.name, 
+      { 
+        name: task.assignee.name, 
+        avatar: task.assignee.avatar 
+      }
+    ])
+  ).values()];
 
   // Helper component for form labels with required indicator
   const FormLabel = ({ htmlFor, required, children }) => (
@@ -135,9 +148,9 @@ const PurchaseOrder = ({ onSubmit }) => {
           required
         >
           <option value="">Select a team member</option>
-          {teamMembers.map(member => (
-            <option key={member.id} value={member.name}>
-              {member.name} ({member.role})
+          {uniqueContacts.map((contact, index) => (
+            <option key={index} value={contact.name}>
+              {contact.name}
             </option>
           ))}
         </select>
@@ -212,9 +225,9 @@ const PurchaseOrder = ({ onSubmit }) => {
           className="w-full bg-gray-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
           multiple
         >
-          {teamMembers.map(member => (
-            <option key={member.id} value={member.name}>
-              {member.name} ({member.role})
+          {uniqueContacts.map((contact, index) => (
+            <option key={index} value={contact.name}>
+              {contact.name}
             </option>
           ))}
         </select>

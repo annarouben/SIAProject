@@ -3,29 +3,77 @@ import { INITIAL_TASKS, INITIAL_CHATS } from './data';
 
 const TaskContext = createContext();
 
+export function useTaskContext() {
+  const context = useContext(TaskContext);
+  if (!context) {
+    throw new Error('useTaskContext must be used within a TaskProvider');
+  }
+  return context;
+}
+
 export function TaskProvider({ children }) {
-  console.log('TaskProvider initializing...');
-  console.log('INITIAL_TASKS:', INITIAL_TASKS);
-  console.log('INITIAL_CHATS:', INITIAL_CHATS);
-  
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [chats, setChats] = useState(INITIAL_CHATS);
 
-  const updateTaskUrgency = (taskId, newUrgency) => {
-    console.group('Task Urgency Update');
-    console.log('Before update - tasks:', tasks);
-    console.log('Updating taskId:', taskId);
-    console.log('New urgency:', newUrgency);
+  // Function to find avatar for a given team member name
+  const findAvatar = (name) => {
+    const contact = INITIAL_TASKS.find(task => 
+      task.assignee.name === name
+    );
+    return contact?.assignee.avatar || "/assets/img/persona/default.png";
+  };
+
+  const addPurchaseOrder = (formData) => {
+    // Find the contact's avatar based on the assignTo value
+    const avatar = findAvatar(formData.assignTo);
     
+    // Calculate the next available ID
+    const highestId = Math.max(...tasks.map(task => 
+      typeof task.id === 'number' ? task.id : 0
+    ));
+    
+    // Create a new task object in the format expected by the Tasks table
+    const newTask = {
+      id: highestId + 1,
+      title: formData.vendor ? `${formData.vendor} Purchase Order` : 'New Purchase Order',
+      description: formData.description || 'No description provided',
+      type: "Purchase Order",
+      status: "Pending Review",
+      urgency: formData.urgency === 'high' ? 'High Priority' : 
+               formData.urgency === 'medium' ? 'Normal' : 'Low',
+      assignee: {
+        name: formData.assignTo || 'Unassigned',
+        avatar: avatar
+      },
+      // Additional purchase order specific fields
+      orderNumber: formData.orderNumber,
+      vendor: formData.vendor || 'Unnamed Vendor',
+      amount: formData.amount || '0.00',
+      orderDate: formData.date,
+      dueDate: formData.dueBy,
+      observers: formData.observers,
+      createdAt: new Date().toISOString() // Important for animation trigger
+    };
+    
+    // Add the new task to the tasks array
+    setTasks(prevTasks => [newTask, ...prevTasks]);
+    
+    // Initialize an empty chat array for this task
+    setChats(prevChats => ({
+      ...prevChats,
+      [newTask.id]: []
+    }));
+    
+    return newTask;
+  };
+
+  const updateTaskUrgency = (taskId, newUrgency) => {
     setTasks(prevTasks => {
-      const updatedTasks = prevTasks.map(task => 
+      return prevTasks.map(task => 
         task.id === taskId 
           ? { ...task, urgency: newUrgency }
           : task
       );
-      console.log('After update - tasks:', updatedTasks);
-      console.groupEnd();
-      return updatedTasks;
     });
   };
 
@@ -35,15 +83,14 @@ export function TaskProvider({ children }) {
     chats,
     setChats,
     updateTaskUrgency,
+    addPurchaseOrder
   };
-
-  return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
+  
+  return (
+    <TaskContext.Provider value={value}>
+      {children}
+    </TaskContext.Provider>
+  );
 }
 
-export function useTaskContext() {
-  const context = useContext(TaskContext);
-  if (!context) {
-    throw new Error('useTaskContext must be used within a TaskProvider');
-  }
-  return context;
-}
+export default TaskContext;
