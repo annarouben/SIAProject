@@ -1,8 +1,7 @@
 import React from 'react';
 import { TaskProvider } from './context/TaskContext';
-import TaskList from './components/TaskList';
-import ContactList from './components/ContactList';
 import Navbar from './components/Navbar';
+import Dashboard from './components/Dashboard';
 import { HashRouter } from 'react-router-dom';
 import './index.css';
 import './App.css';
@@ -12,12 +11,9 @@ function App() {
   return (
     <TaskProvider>
       <HashRouter>
-        <div className="min-h-screen bg-gray-900">
+        <div className="min-h-screen bg-gray-900 text-gray-200">
           <Navbar />
-          <div className="pt-16">
-            <ContactList />
-            <TaskList />
-          </div>
+          <Dashboard />
         </div>
       </HashRouter>
     </TaskProvider>
