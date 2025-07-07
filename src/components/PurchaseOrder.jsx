@@ -136,7 +136,7 @@ const PurchaseOrder = ({ onSubmit }) => {
       </div>
 
       <div>
-        <FormLabel htmlFor="assignTo" required>
+        <FormLabel htmlFor="assignTo">
           Assign To
         </FormLabel>
         <select
@@ -145,9 +145,8 @@ const PurchaseOrder = ({ onSubmit }) => {
           value={formData.assignTo}
           onChange={handleChange}
           className="w-full bg-gray-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          required
         >
-          <option value="">Select a team member</option>
+          <option value="">Select a team member (optional)</option>
           {uniqueContacts.map((contact, index) => (
             <option key={index} value={contact.name}>
               {contact.name}

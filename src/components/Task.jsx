@@ -1,36 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import { getImagePath } from '../utils/imagePath';
-import ChatThread from './ChatThread';
+import ChatThread from './ChatThread'; // Import ChatThread
 
 const Task = ({ task }) => {
-  // Add null check for task prop
-  if (!task) {
-    console.error('Task component received null or undefined task');
-    return null;
-  }
-
   const [showUrgencyDropdown, setShowUrgencyDropdown] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [isNewTask, setIsNewTask] = useState(false);
-  const { updateTaskUrgency, chats = {} } = useTaskContext();
-  
-  // Check if this is a new purchase order and set animation flag
+  const { updateTaskUrgency, chats } = useTaskContext();
+
   useEffect(() => {
-    if (task.type === 'Purchase Order' && task.createdAt) {
-      const creationTime = new Date(task.createdAt).getTime();
-      const isNew = creationTime > Date.now() - 5000; // 5 seconds
-      setIsNewTask(isNew);
-      
-      // Remove the highlight after animation completes
-      if (isNew) {
-        const timer = setTimeout(() => {
-          setIsNewTask(false);
-        }, 2000); // Animation duration
-        return () => clearTimeout(timer);
+    const handleClickOutside = (event) => {
+      if (showUrgencyDropdown) {
+        setShowUrgencyDropdown(false);
       }
-    }
-  }, [task]);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUrgencyDropdown]);
 
   const getUrgencyColor = (urgency) => {
     switch (urgency) {
@@ -116,19 +105,27 @@ const Task = ({ task }) => {
 
   return (
     <>
-      <tr 
-        className={`hover:bg-gray-700 ${
-          isNewTask ? 'animate-new-task' : ''
-        }`}
-      >
+      <tr className="hover:bg-gray-700">
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center">
-            <img 
-              src={getImagePath(task.assignee.avatar)}
-              alt={task.assignee.name}
-              className="w-8 h-8 rounded-full"
-            />
-            <span className="ml-3 text-sm text-gray-300">{task.assignee.name}</span>
+            {task.assignee && task.assignee.avatar ? (
+              // Show existing avatar for assigned tasks
+              <img 
+                src={getImagePath(task.assignee.avatar)}
+                alt={task.assignee.name}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              // Show generic user icon with the same styling as assigned avatars
+              <img 
+                src="/assets/img/persona/user.svg"
+                alt="Unassigned"
+                className="w-8 h-8 rounded-full object-cover bg-gray-700"
+              />
+            )}
+            <span className="ml-3 text-sm text-gray-300">
+              {task.assignee && task.assignee.name ? task.assignee.name : "Unassigned"}
+            </span>
           </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{task.type}</td>
