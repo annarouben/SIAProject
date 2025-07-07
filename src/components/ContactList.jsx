@@ -16,7 +16,7 @@ const WORK_CAPACITY = {
   AVAILABLE: {
     label: 'Available',
     range: '60-94%',
-    stress: 'Low stress'  // Changed from 'Normal'
+    stress: 'Low stress'
   },
   LOW_LOAD: {
     label: 'Low workload',
@@ -38,8 +38,10 @@ const ChevronRightIcon = (
   </svg>
 );
 
-const ContactList = () => {
+const ContactList = ({ onSelectContact, selectedContactId, isDetailsPanelOpen }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  
   const contacts = [
     {
       id: 1,
@@ -48,7 +50,11 @@ const ContactList = () => {
       rating: 5,
       workCapacity: WORK_CAPACITY.OVER_CAPACITY,
       capacityPercentage: 120,
-      goodAtTask: "Evaluate Product"
+      goodAtTask: "Evaluate Product",
+      title: "Product Specialist",
+      department: "Product",
+      email: "amber@example.com",
+      phone: "(555) 123-4567"
     },
     {
       id: 2,
@@ -57,7 +63,11 @@ const ContactList = () => {
       rating: 4,
       workCapacity: WORK_CAPACITY.AT_CAPACITY,
       capacityPercentage: 98,
-      goodAtTask: "Purchase Order"
+      goodAtTask: "Purchase Order",
+      title: "Procurement Officer",
+      department: "Finance",
+      email: "astrid@example.com",
+      phone: "(555) 234-5678"
     },
     {
       id: 3,
@@ -66,7 +76,11 @@ const ContactList = () => {
       rating: 3,
       workCapacity: WORK_CAPACITY.AVAILABLE,
       capacityPercentage: 75,
-      goodAtTask: "Hire"
+      goodAtTask: "Hire",
+      title: "HR Manager",
+      department: "Human Resources",
+      email: "ben@example.com",
+      phone: "(555) 345-6789"
     },
     {
       id: 4,
@@ -75,7 +89,11 @@ const ContactList = () => {
       rating: 4,
       workCapacity: WORK_CAPACITY.LOW_LOAD,
       capacityPercentage: 45,
-      goodAtTask: "Evaluate Product"
+      goodAtTask: "Evaluate Product",
+      title: "Product Analyst",
+      department: "Product",
+      email: "hugo@example.com",
+      phone: "(555) 456-7890"
     },
     {
       id: 5,
@@ -84,7 +102,11 @@ const ContactList = () => {
       rating: 5,
       workCapacity: WORK_CAPACITY.AT_CAPACITY,
       capacityPercentage: 95,
-      goodAtTask: "Purchase Order"
+      goodAtTask: "Purchase Order",
+      title: "Product Manager",
+      department: "Product",
+      email: "mina@example.com",
+      phone: "(555) 567-8901"
     },
     {
       id: 6,
@@ -93,7 +115,11 @@ const ContactList = () => {
       rating: 3,
       workCapacity: WORK_CAPACITY.AVAILABLE,
       capacityPercentage: 80,
-      goodAtTask: "Hire"
+      goodAtTask: "Hire",
+      title: "Talent Acquisition",
+      department: "Human Resources",
+      email: "sally@example.com",
+      phone: "(555) 678-9012"
     }
   ];
 
@@ -103,18 +129,32 @@ const ContactList = () => {
   
   // Update main layout when contacts panel changes
   useEffect(() => {
-    // Set a CSS variable that other components can use to adjust their layout
     document.documentElement.style.setProperty(
       '--contacts-panel-width', 
       isExpanded ? '400px' : '80px'
     );
     
-    // Dispatch a custom event that TasksList can listen for
     window.dispatchEvent(new CustomEvent('contactsPanelResize', {
       detail: { isExpanded }
     }));
   }, [isExpanded]);
 
+  // Filter contacts based on search term
+  const filteredContacts = contacts.filter(contact => 
+    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    contact.goodAtTask.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  // Handler for contact click
+  const handleContactClick = (contact) => {
+    console.log('Contact clicked:', contact);
+    if (typeof onSelectContact === 'function') {
+      onSelectContact(contact);
+    } else {
+      console.error('onSelectContact is not a function or not provided');
+    }
+  };
+  
   return (
     <div 
       className={`fixed left-0 top-16 bg-gray-900 transition-all duration-300 z-10 ${
@@ -142,16 +182,42 @@ const ContactList = () => {
           <div className="h-full overflow-y-auto">
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-100 mb-4">Contacts</h2>
+              
+              {/* Search bar */}
+              <div className="relative mb-4">
+                <input
+                  type="text"
+                  placeholder="Search contacts..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="w-full bg-gray-700 text-white px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
               <div className="space-y-4">
-                {contacts.map((contact) => (
-                  <Contact 
+                {filteredContacts.map((contact) => (
+                  <div 
                     key={contact.id} 
-                    contact={{
-                      ...contact,
-                      avatar: getImagePath(contact.avatar)
-                    }} 
-                  />
+                    onClick={() => handleContactClick(contact)}
+                    className={`cursor-pointer ${
+                      selectedContactId === contact.id && isDetailsPanelOpen
+                        ? 'ring-2 ring-blue-500 ring-opacity-75 rounded-lg'
+                        : ''
+                    }`}
+                  >
+                    <Contact 
+                      contact={{
+                        ...contact,
+                        avatar: getImagePath(contact.avatar)
+                      }}
+                      isSelected={selectedContactId === contact.id && isDetailsPanelOpen}
+                    />
+                  </div>
                 ))}
+                
+                {filteredContacts.length === 0 && (
+                  <p className="text-gray-400 text-center py-4">No contacts found</p>
+                )}
               </div>
             </div>
           </div>
@@ -175,13 +241,22 @@ const ContactList = () => {
             {contacts.slice(0, 5).map((contact, index) => (
               <div 
                 key={contact.id} 
-                className="group relative" 
+                className={`group relative cursor-pointer ${
+                  selectedContactId === contact.id && isDetailsPanelOpen
+                    ? 'ring-2 ring-blue-500 ring-opacity-75 rounded-full'
+                    : ''
+                }`}
                 style={{ zIndex: 50 - index }}
+                onClick={() => handleContactClick(contact)}
               >
                 <img 
                   src={getImagePath(contact.avatar)}
                   alt={contact.name}
-                  className="w-12 h-12 rounded-full border-2 border-gray-700 object-cover transition-transform hover:scale-110"
+                  className={`w-12 h-12 rounded-full border-2 ${
+                    selectedContactId === contact.id && isDetailsPanelOpen
+                      ? 'border-blue-500'
+                      : 'border-gray-700'
+                  } object-cover transition-transform hover:scale-110`}
                   title={contact.name}
                 />
                 <div className="absolute -right-28 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 px-2 py-1 text-xs rounded whitespace-nowrap z-50">
