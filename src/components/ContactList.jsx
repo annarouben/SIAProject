@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getImagePath } from '../utils/imagePath';
 import Contact from './Contact';
+import ContactDetails from './ContactDetails';
 
 const WORK_CAPACITY = {
   OVER_CAPACITY: {
@@ -41,6 +42,8 @@ const ChevronRightIcon = (
 const ContactList = ({ onSelectContact, selectedContactId, isDetailsPanelOpen }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [overlayPosition, setOverlayPosition] = useState({ top: 0 });
+  const contactRefs = useRef({});
   
   const contacts = [
     {
@@ -145,9 +148,22 @@ const ContactList = ({ onSelectContact, selectedContactId, isDetailsPanelOpen })
     contact.goodAtTask.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
-  // Handler for contact click
-  const handleContactClick = (contact) => {
+  // Handler for contact click with position calculation
+  const handleContactClick = (contact, e) => {
     console.log('Contact clicked:', contact);
+    
+    // Calculate position for overlay based on the clicked element
+    const contactElement = contactRefs.current[contact.id];
+    if (contactElement) {
+      const rect = contactElement.getBoundingClientRect();
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      
+      // Position the overlay next to the contact
+      setOverlayPosition({
+        top: rect.top + scrollTop,
+      });
+    }
+    
     if (typeof onSelectContact === 'function') {
       onSelectContact(contact);
     } else {
@@ -155,12 +171,16 @@ const ContactList = ({ onSelectContact, selectedContactId, isDetailsPanelOpen })
     }
   };
   
+  // Get selected contact object
+  const selectedContact = contacts.find(contact => contact.id === selectedContactId);
+  
   return (
     <div 
       className={`fixed left-0 top-16 bg-gray-900 transition-all duration-300 z-10 ${
         isExpanded ? 'w-[400px]' : 'w-[80px]'
       } h-[calc(100vh-64px)]`}
     >
+      {/* The main contact list */}
       {isExpanded ? (
         /* Expanded View */
         <>
@@ -198,7 +218,8 @@ const ContactList = ({ onSelectContact, selectedContactId, isDetailsPanelOpen })
                 {filteredContacts.map((contact) => (
                   <div 
                     key={contact.id} 
-                    onClick={() => handleContactClick(contact)}
+                    ref={el => contactRefs.current[contact.id] = el}
+                    onClick={(e) => handleContactClick(contact, e)}
                     className={`cursor-pointer ${
                       selectedContactId === contact.id && isDetailsPanelOpen
                         ? 'ring-2 ring-blue-500 ring-opacity-75 rounded-lg'
@@ -223,7 +244,7 @@ const ContactList = ({ onSelectContact, selectedContactId, isDetailsPanelOpen })
           </div>
         </>
       ) : (
-        /* Collapsed View - Vertically stacked avatars with consistent left padding */
+        /* Collapsed View - Vertically stacked avatars */
         <div className="flex flex-col py-6 pl-6 items-center">
           {/* Toggle Button at the top */}
           <button
@@ -241,13 +262,14 @@ const ContactList = ({ onSelectContact, selectedContactId, isDetailsPanelOpen })
             {contacts.slice(0, 5).map((contact, index) => (
               <div 
                 key={contact.id} 
+                ref={el => contactRefs.current[contact.id] = el}
                 className={`group relative cursor-pointer ${
                   selectedContactId === contact.id && isDetailsPanelOpen
                     ? 'ring-2 ring-blue-500 ring-opacity-75 rounded-full'
                     : ''
                 }`}
                 style={{ zIndex: 50 - index }}
-                onClick={() => handleContactClick(contact)}
+                onClick={(e) => handleContactClick(contact, e)}
               >
                 <img 
                   src={getImagePath(contact.avatar)}
@@ -271,6 +293,25 @@ const ContactList = ({ onSelectContact, selectedContactId, isDetailsPanelOpen })
               </div>
             )}
           </div>
+        </div>
+      )}
+      
+      {/* Contact Details Overlay */}
+      {isDetailsPanelOpen && selectedContact && (
+        <div 
+          className="fixed left-[400px] bg-gray-800 border-gray-700 border shadow-xl rounded-lg w-[400px] max-h-[80vh] overflow-auto z-50 transform transition-all duration-300"
+          style={{ 
+            top: `${overlayPosition.top}px`, 
+            maxHeight: 'calc(100vh - 80px - 16px)',  // Account for header and some padding
+          }}
+        >
+          <ContactDetails 
+            contact={{
+              ...selectedContact,
+              avatar: getImagePath(selectedContact.avatar)
+            }}
+            onClose={() => onSelectContact(selectedContact)} // Toggle off when closing
+          />
         </div>
       )}
     </div>

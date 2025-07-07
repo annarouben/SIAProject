@@ -1,9 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StarRating from './StarRating';
 import { getImagePath } from '../utils/imagePath';
 
-const ContactDetails = ({ contact, onClose }) => {
+const ContactDetails = ({ contact, onClose, onNavigate, currentIndex, totalContacts }) => {
   const [activeTab, setActiveTab] = useState('info'); // 'info', 'activity', 'tasks'
+
+  // Add keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Arrow keys for navigation
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        onNavigate('prev');
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        onNavigate('next');
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onNavigate, onClose]);
 
   // Sample recent activities for the contact
   const recentActivities = [
@@ -81,10 +98,43 @@ const ContactDetails = ({ contact, onClose }) => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with close button */}
-      <div className="flex justify-between items-center mb-4 p-4 border-b border-gray-700">
-        <h2 className="text-lg font-medium text-white">Contact Details</h2>
-        <button onClick={onClose} className="text-gray-400 hover:text-white">
+      {/* Header with navigation controls, contact count, and close button */}
+      <div className="flex justify-between items-center p-4 border-b border-gray-700 bg-gray-800 sticky top-0 z-10">
+        <div className="flex items-center">
+          <h2 className="text-lg font-medium text-white mr-4">
+            Contact Details 
+            <span className="ml-2 text-sm text-gray-400">
+              {currentIndex + 1} of {totalContacts}
+            </span>
+          </h2>
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => onNavigate('prev')}
+              className="p-1.5 rounded-full hover:bg-gray-700 text-gray-400 hover:text-white transition-colors prev-contact-btn"
+              aria-label="Previous contact"
+              title="Previous contact (← / ↑ keys)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button 
+              onClick={() => onNavigate('next')}
+              className="p-1.5 rounded-full hover:bg-gray-700 text-gray-400 hover:text-white transition-colors next-contact-btn"
+              aria-label="Next contact"
+              title="Next contact (→ / ↓ keys)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button 
+          onClick={onClose} 
+          className="text-gray-400 hover:text-white"
+          title="Close details (Esc)"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -236,3 +286,16 @@ const ContactDetails = ({ contact, onClose }) => {
 };
 
 export default ContactDetails;
+
+/* Usage example with suggested code change:
+<ContactDetails 
+  contact={{
+    ...selectedContact,
+    avatar: selectedContact.avatar
+  }}
+  onClose={() => setActivePanel(null)}
+  onNavigate={handleContactNavigation}
+  currentIndex={currentContactIndex}
+  totalContacts={allContacts.length}
+/>
+*/
