@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import StarRating from './StarRating';
+import { getImagePath } from '../utils/imagePath';
 
 const ContactDetails = ({ contact, onClose }) => {
   const [activeTab, setActiveTab] = useState('info'); // 'info', 'activity', 'tasks'
@@ -94,7 +95,7 @@ const ContactDetails = ({ contact, onClose }) => {
       <div className="p-4 border-b border-gray-700">
         <div className="flex items-center">
           <img 
-            src={contact.avatar} 
+            src={getImagePath(contact.avatar)} 
             alt={contact.name} 
             className="w-16 h-16 rounded-full mr-4 border-2 border-gray-700 object-cover"
           />
