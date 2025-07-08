@@ -1,19 +1,20 @@
 // Utility function to handle image paths across the application
 export const getImagePath = (path) => {
-  // Return the user.svg path if no path is provided
+  // If path is missing or null, use the user.svg file instead
   if (!path) {
     return '/assets/img/persona/user.svg';
   }
   
-  // If path is explicitly set to default.png, use user.svg instead
+  // Check if already an absolute URL (starts with http or https)
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // Check if path is explicitly set to default.png, use user.svg instead
   if (path.includes('default.png')) {
     return '/assets/img/persona/user.svg';
   }
   
-  // Handle regular paths
-  if (path.startsWith('/') || path.startsWith('http')) {
-    return path;
-  }
-  
-  return `/${path}`;
+  // Make sure path starts with a forward slash for consistent resolution
+  return path.startsWith('/') ? path : `/${path}`;
 };
