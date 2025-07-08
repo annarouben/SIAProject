@@ -7,7 +7,7 @@ const isGitHubPages = () => {
 };
 
 // Repository name for GitHub Pages
-const REPO_NAME = '/SIAReact';
+const REPO_NAME = '/SIAProject';
 
 export const getImagePath = (path) => {
   // Handle null/undefined paths
