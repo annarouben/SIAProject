@@ -20,7 +20,7 @@ export function TaskProvider({ children }) {
     const contact = INITIAL_TASKS.find(task => 
       task.assignee.name === name
     );
-    return contact?.assignee.avatar || "/assets/img/persona/default.png";
+    return contact?.assignee.avatar || "/assets/img/persona/user.svg";
   };
 
   const addPurchaseOrder = (formData) => {

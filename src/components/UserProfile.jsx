@@ -66,7 +66,7 @@ const UserProfile = ({ onClose }) => {
               className="w-32 h-32 rounded-full border-4 border-blue-600 mb-4 md:mb-0"
               onError={(e) => {
                 console.error("Image failed to load:", userInfo.avatar);
-                e.target.src = getImagePath('/assets/img/persona/default.png');
+                e.target.src = getImagePath('/assets/img/persona/user.svg');
               }}
             />
             <div className="md:ml-8 text-center md:text-left">

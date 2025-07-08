@@ -1,4 +1,4 @@
-// Utility function to handle image paths across the application
+// Simplified utility function to handle image paths across environments
 
 // Check if we're running in a GitHub Pages environment
 const isGitHubPages = () => {
