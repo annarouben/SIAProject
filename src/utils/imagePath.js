@@ -1,7 +1,10 @@
 // Utility function to handle image paths across the application
 export const getImagePath = (path) => {
-  // If path is missing or null, use the user.svg file instead
+  console.log('Original path:', path);
+  
+  // Handle null/undefined
   if (!path) {
+    console.log('Returning default for empty path');
     return '/assets/img/persona/user.svg';
   }
   
@@ -16,5 +19,7 @@ export const getImagePath = (path) => {
   }
   
   // Make sure path starts with a forward slash for consistent resolution
-  return path.startsWith('/') ? path : `/${path}`;
+  const result = path.startsWith('/') ? path : `/${path}`;
+  console.log('Transformed path:', result);
+  return result;
 };
