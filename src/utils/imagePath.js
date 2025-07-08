@@ -10,39 +10,30 @@ const isGitHubPages = () => {
 const REPO_NAME = '/SIAReact';
 
 export const getImagePath = (path) => {
-  // Handle null/undefined
+  // Handle null/undefined paths
   if (!path) {
     return isGitHubPages() 
       ? `${REPO_NAME}/assets/img/persona/user.svg` 
       : '/assets/img/persona/user.svg';
   }
   
-  // Check if already an absolute URL (starts with http or https)
+  // Handle absolute URLs
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
+
+  // Add leading slash if needed (for both environments)
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   
-  // Check if path is explicitly set to default.png, use user.svg instead
-  if (path.includes('default.png')) {
-    return isGitHubPages() 
-      ? `${REPO_NAME}/assets/img/persona/user.svg` 
-      : '/assets/img/persona/user.svg';
+  // For GitHub Pages, add the repository name prefix
+  if (isGitHubPages()) {
+    // Don't add repo name if it's already there
+    if (normalizedPath.startsWith(REPO_NAME)) {
+      return normalizedPath;
+    }
+    return `${REPO_NAME}${normalizedPath}`;
   }
   
-  // If not running on GitHub Pages, use the path as-is (with leading slash)
-  if (!isGitHubPages()) {
-    return path.startsWith('/') ? path : `/${path}`;
-  }
-  
-  // GITHUB PAGES ENVIRONMENT - Fix path handling
-  
-  // Make sure we don't add the repo name twice
-  if (path.startsWith(REPO_NAME)) {
-    return path;
-  }
-  
-  // Make sure path has proper structure with repo name
-  return path.startsWith('/') 
-    ? `${REPO_NAME}${path}` 
-    : `${REPO_NAME}/${path}`;
+  // For local development, just return the normalized path
+  return normalizedPath;
 };
