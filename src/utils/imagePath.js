@@ -10,11 +10,8 @@ const isGitHubPages = () => {
 const REPO_NAME = '/SIAReact';
 
 export const getImagePath = (path) => {
-  console.log('Original path:', path);
-  
   // Handle null/undefined
   if (!path) {
-    console.log('Returning default for empty path');
     return isGitHubPages() 
       ? `${REPO_NAME}/assets/img/persona/user.svg` 
       : '/assets/img/persona/user.svg';
@@ -34,23 +31,18 @@ export const getImagePath = (path) => {
   
   // If not running on GitHub Pages, use the path as-is (with leading slash)
   if (!isGitHubPages()) {
-    const result = path.startsWith('/') ? path : `/${path}`;
-    console.log('Transformed path (local):', result);
-    return result;
+    return path.startsWith('/') ? path : `/${path}`;
   }
   
-  // Add repository name for GitHub Pages and ensure consistent path format
-  let result = '';
-  if (path.startsWith(REPO_NAME + '/')) {
-    // Path already includes the repo name, use as is
-    result = path;
-  } else {
-    // Add repo name prefix to path
-    result = path.startsWith('/') 
-      ? `${REPO_NAME}${path}` 
-      : `${REPO_NAME}/${path}`;
+  // GITHUB PAGES ENVIRONMENT - Fix path handling
+  
+  // Make sure we don't add the repo name twice
+  if (path.startsWith(REPO_NAME)) {
+    return path;
   }
   
-  console.log('Transformed path (GitHub Pages):', result);
-  return result;
+  // Make sure path has proper structure with repo name
+  return path.startsWith('/') 
+    ? `${REPO_NAME}${path}` 
+    : `${REPO_NAME}/${path}`;
 };
