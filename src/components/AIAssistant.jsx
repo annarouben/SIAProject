@@ -2,8 +2,20 @@ import { useState, useEffect, useRef } from 'react';
 import { getImagePath } from '../utils/imagePath';
 import SendIcon from './icons/SendIcon';
 import PurchaseOrder from './PurchaseOrder';  // Import the PurchaseOrder component
+import { useTaskContext } from '../context/TaskContext';
+
+// Updated team member data - only including the main contacts from your system
+const TEAM_MEMBERS = [
+  { name: "Amber", role: "Finance Manager", avatar: "/assets/img/persona/amber.png" },
+  { name: "Astrid", role: "Finance Specialist", avatar: "/assets/img/persona/astrid.png" },
+  { name: "Ben", role: "Procurement Lead", avatar: "/assets/img/persona/ben.png" },
+  { name: "Hugo", role: "Product Manager", avatar: "/assets/img/persona/hugo.png" },
+  { name: "Mina", role: "Project Manager", avatar: "/assets/img/persona/mina.png" }
+  // Blake removed as requested
+];
 
 const AIAssistant = ({ onClose }) => {
+  const { tasks, setTasks } = useTaskContext();
   const [userInput, setUserInput] = useState('');
   const [isCommandsOpen, setIsCommandsOpen] = useState(false);
   const [activeComponent, setActiveComponent] = useState(null); // State to track active component
@@ -104,6 +116,7 @@ const AIAssistant = ({ onClose }) => {
   const sidebarRef = useRef(null);
   const chatContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const [lastCreatedTaskId, setLastCreatedTaskId] = useState(null);
 
   // Common tasks that users might want to initiate
   const commonTasks = [
@@ -149,6 +162,104 @@ const AIAssistant = ({ onClose }) => {
     setUserInput('');
   };
 
+  // Function to generate assignment suggestions based on task details
+  const generateAssignmentSuggestions = (task) => {
+    // Extract relevant details from the task
+    const title = task.title?.toLowerCase() || '';
+    const description = task.description?.toLowerCase() || '';
+    const vendor = task.vendor?.toLowerCase() || '';
+    const amount = parseFloat(task.amount || '0');
+    const urgency = task.urgency;
+    
+    // Score each team member based on task details
+    const scoredMembers = TEAM_MEMBERS.map(member => {
+      let score = 0;
+      let reasons = [];
+      
+      // Check amount thresholds
+      if (amount > 10000 && member.name === "Amber") {
+        score += 30;
+        reasons.push("handles high-value purchases over $10,000");
+      } else if (amount > 5000 && amount <= 10000 && member.name === "Astrid") {
+        score += 25;
+        reasons.push("specializes in mid-range purchases ($5,000-$10,000)");
+      } else if (amount <= 5000 && member.name === "Mina") {
+        score += 20;
+        reasons.push("regularly processes smaller purchases under $5,000");
+      }
+      
+      // Check for technology-related purchases
+      if ((title.includes('tech') || description.includes('tech') || 
+           vendor.includes('tech') || title.includes('software') || 
+           description.includes('software')) && member.name === "Ben") {
+        score += 25;
+        reasons.push("specializes in technology and software procurement");
+      }
+      
+      // Check for office supplies - reassigned from Blake to Mina
+      if ((title.includes('office') || description.includes('office') || 
+           title.includes('supplies') || description.includes('supplies')) && 
+          member.name === "Mina") {
+        score += 25;
+        reasons.push("manages office supply acquisitions");
+      }
+      
+      // Check for service contracts or subscriptions
+      if ((description.includes('service') || description.includes('subscription') || 
+           description.includes('contract')) && member.name === "Hugo") {
+        score += 20;
+        reasons.push("has expertise in service contracts and subscriptions");
+      }
+      
+      // Check for equipment purchases
+      if ((title.includes('equipment') || description.includes('equipment')) && 
+          member.name === "Mina") {
+        score += 20;
+        reasons.push("specializes in equipment procurement");
+      }
+      
+      // Urgency considerations
+      if (urgency === "High Priority" && member.name === "Amber") {
+        score += 15;
+        reasons.push("prioritizes urgent purchase requests");
+      }
+      
+      // Additional considerations for specific team members
+      if (member.name === "Astrid") {
+        score += 10;
+        reasons.push("has strong vendor relationship management skills");
+      }
+
+      if (member.name === "Hugo" && 
+         (title.includes('software') || description.includes('software'))) {
+        score += 15;
+        reasons.push("oversees software product purchases");
+      }
+      
+      // Add a small random factor to avoid same recommendations every time
+      score += Math.random() * 5;
+      
+      return {
+        ...member,
+        score,
+        reasons
+      };
+    });
+    
+    // Sort by score (highest first) and take top 3
+    const topSuggestions = scoredMembers
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map(member => ({
+        name: member.name,
+        role: member.role,
+        avatar: member.avatar,
+        reason: member.reasons[0] || `has experience with similar tasks`
+      }));
+    
+    return topSuggestions;
+  };
+
   // Handle clicking on a common task button with enhanced component display
   const handleTaskClick = (prompt, component) => {
     sendMessage(prompt);
@@ -171,18 +282,97 @@ const AIAssistant = ({ onClose }) => {
     }
   };
 
+  // Function to assign a task to a suggested team member
+  const assignTaskFromSuggestion = (taskId, suggestion) => {
+    // Update the task in the tasks state
+    setTasks(prevTasks => {
+      return prevTasks.map(task => 
+        task.id === taskId 
+          ? { 
+              ...task, 
+              assignee: {
+                name: suggestion.name,
+                avatar: suggestion.avatar
+              }
+            }
+          : task
+      );
+    });
+    
+    // Add a confirmation message to the AI chat
+    setMessages(prev => [...prev, { 
+      id: prev.length + 1,
+      sender: 'ai', 
+      text: `✓ I've assigned this purchase order to ${suggestion.name}. They ${suggestion.reason}.`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }]);
+  };
+
   // Function to handle purchase order submission
   const handlePurchaseOrderSubmit = (formData) => {
+    // Calculate the next available ID
+    const highestId = Math.max(...tasks.map(task => 
+      typeof task.id === 'number' ? task.id : 0
+    ), 0);
+    
+    // Generate order number if not provided
+    const orderNumber = formData.orderNumber || 'PO-' + Math.floor(10000 + Math.random() * 90000);
+    
+    // Create new task object
+    const newTask = {
+      id: highestId + 1,
+      title: formData.vendor ? `${formData.vendor} Purchase Order` : 'New Purchase Order',
+      description: formData.description || 'No description provided',
+      type: "Purchase Order",
+      status: "Pending Review",
+      urgency: formData.urgency === 'high' ? 'High Priority' : 
+               formData.urgency === 'medium' ? 'Normal' : 'Low',
+      assignee: {
+        name: formData.assignTo || 'Unassigned',
+        avatar: formData.assignTo ? "/assets/img/persona/user.svg" : "/assets/img/persona/user.svg"
+      },
+      // Additional purchase order specific fields
+      orderNumber: orderNumber,
+      vendor: formData.vendor || 'Unnamed Vendor',
+      amount: formData.amount || '0.00',
+      orderDate: formData.date,
+      dueDate: formData.dueBy,
+      createdAt: new Date().toISOString()
+    };
+    
+    // Add the new task to tasks
+    setTasks(prevTasks => [newTask, ...prevTasks]);
+    
+    // Save the ID for suggestion generation
+    setLastCreatedTaskId(newTask.id);
+    
     // Add a message showing the purchase order was created
     setMessages(prev => [...prev, { 
       id: prev.length + 1,
       sender: 'ai', 
-      text: `✅ Purchase Order #${formData.orderNumber || 'PO-' + Math.floor(Math.random() * 10000)} has been created successfully for ${formData.vendor || 'the specified vendor'}. The order has been sent for approval.`,
+      text: `✅ Purchase Order #${orderNumber} has been created successfully for ${formData.vendor || 'the specified vendor'}. The order has been sent for approval.`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }]);
     
     // Close the purchase order form
     setActiveComponent(null);
+    
+    // If task is unassigned, add suggestion message after a short delay
+    if (!formData.assignTo || formData.assignTo === 'Unassigned') {
+      setTimeout(() => {
+        const suggestions = generateAssignmentSuggestions(newTask);
+        
+        // Create AI suggestion message
+        setMessages(prev => [...prev, { 
+          id: prev.length + 1,
+          sender: 'ai', 
+          text: `I noticed this purchase order is unassigned. Based on the details, here are some team members who might be good fits:`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          suggestions,
+          taskId: newTask.id
+        }]);
+      }, 1000);
+    }
   };
 
   // Toggle commands visibility
@@ -251,34 +441,73 @@ const AIAssistant = ({ onClose }) => {
             {messages.map((message, index) => (
               <div 
                 key={index}
-                className={`flex mb-4 ${message.sender === 'ai' ? 'justify-start' : 'justify-end'}`}
+                className="mb-4"
               >
-                {message.sender === 'ai' && (
-                  <div className="w-8 h-8 mr-2 flex-shrink-0">
-                    <img 
-                      src={getImagePath('/assets/img/newtonLogo.png')} 
-                      alt="AI" 
-                      className="w-full h-full rounded-full"
-                    />
+                {/* Message bubble */}
+                <div className={`flex ${message.sender === 'ai' ? 'justify-start' : 'justify-end'}`}>
+                  {message.sender === 'ai' && (
+                    <div className="w-8 h-8 mr-2 flex-shrink-0">
+                      <img 
+                        src={getImagePath('/assets/img/newtonLogo.png')} 
+                        alt="AI" 
+                        className="w-full h-full rounded-full"
+                      />
+                    </div>
+                  )}
+                  <div className={`max-w-[80%] rounded-lg p-3 ${
+                    message.sender === 'user' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-700 text-gray-300'
+                  }`}>
+                    <p className="text-sm whitespace-pre-line">{message.text}</p>
+                    <span className="text-xs opacity-75 mt-1 block">
+                      {message.timestamp}
+                    </span>
                   </div>
-                )}
-                <div className={`max-w-[80%] rounded-lg p-3 ${
-                  message.sender === 'user' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-700 text-gray-300'
-                }`}>
-                  <p className="text-sm whitespace-pre-line">{message.text}</p>
-                  <span className="text-xs opacity-75 mt-1 block">
-                    {message.timestamp}
-                  </span>
+                  {message.sender === 'user' && (
+                    <div className="w-8 h-8 ml-2 flex-shrink-0">
+                      <img 
+                        src={getImagePath('/assets/img/persona/mina.png')}
+                        alt="Mina"
+                        className="w-full h-full rounded-full"
+                      />
+                    </div>
+                  )}
                 </div>
-                {message.sender === 'user' && (
-                  <div className="w-8 h-8 ml-2 flex-shrink-0">
-                    <img 
-                      src={getImagePath('/assets/img/persona/mina.png')}
-                      alt="Mina"
-                      className="w-full h-full rounded-full"
-                    />
+                
+                {/* Suggestions section if this message has them */}
+                {message.sender === 'ai' && message.suggestions && (
+                  <div className="ml-10 mt-2 space-y-2">
+                    {message.suggestions.map((suggestion, i) => (
+                      <div 
+                        key={i}
+                        className="bg-gray-700/60 rounded-lg p-2 flex items-center justify-between border border-gray-600"
+                      >
+                        <div className="flex items-center">
+                          <img
+                            src={getImagePath(suggestion.avatar)}
+                            alt={suggestion.name}
+                            className="w-6 h-6 rounded-full"
+                          />
+                          <div className="ml-2">
+                            <p className="text-xs font-medium text-white">{suggestion.name}</p>
+                            <p className="text-xs text-gray-400">{suggestion.role}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-300 hidden sm:block max-w-[100px] truncate">
+                            {suggestion.reason}
+                          </p>
+                          <button
+                            onClick={() => assignTaskFromSuggestion(message.taskId, suggestion)}
+                            className="text-xs bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded transition-colors"
+                          >
+                            Assign
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useTaskContext } from '../context/TaskContext';
 import { getImagePath } from '../utils/imagePath';
 
-const TaskChat = ({ taskId, onClose }) => {
+const AIChat = ({ taskId, onClose }) => {
   const [message, setMessage] = useState('');
   const messagesEndRef = useRef(null);
   const { sendChatMessage, chats } = useTaskContext();
@@ -97,4 +97,4 @@ const TaskChat = ({ taskId, onClose }) => {
   );
 };
 
-export default TaskChat;
+export default AIChat;

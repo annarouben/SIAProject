@@ -116,12 +116,14 @@ const Task = ({ task }) => {
                 className="w-8 h-8 rounded-full object-cover"
               />
             ) : (
-              // Show generic user icon with the same styling as assigned avatars
-              <img 
-                src="/assets/img/persona/user.svg"
-                alt="Unassigned"
-                className="w-8 h-8 rounded-full object-cover bg-gray-700"
-              />
+              // Show generic user icon from SVG file for unassigned tasks - now full size
+              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+                <img 
+                  src="/assets/img/persona/user.svg"
+                  alt="Unassigned"
+                  className="w-full h-full" // Increased from w-5 h-5 to w-6 h-6
+                />
+              </div>
             )}
             <span className="ml-3 text-sm text-gray-300">
               {task.assignee && task.assignee.name ? task.assignee.name : "Unassigned"}
