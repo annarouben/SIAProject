@@ -34,7 +34,8 @@ const Navbar = () => {
             <img 
               src={getImagePath('/assets/img/aiLogo.svg')}
               alt="SIA"
-              className="h-8"
+              className="h-8 cursor-pointer"
+              onClick={handleDashboardClick}
             />
           </div>
           <div className="flex items-center">
