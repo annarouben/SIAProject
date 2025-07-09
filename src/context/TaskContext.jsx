@@ -77,13 +77,44 @@ export function TaskProvider({ children }) {
     });
   };
 
+  const calculateTaskRisk = (task) => {
+    // Risk calculation logic based on task properties
+    // Returns an object with level, score, and factors
+    
+    // Example simplified implementation:
+    if (task.urgency === "High Priority") {
+      return {
+        level: "High",
+        score: 70,
+        factors: ["Task marked as high priority", "Requires immediate attention"]
+      };
+    }
+    
+    if (task.type === "Purchase Order" && task.assignee.name === "Unassigned") {
+      return {
+        level: "High",
+        score: 65,
+        factors: ["Purchase order is unassigned", "Approval process cannot start"]
+      };
+    }
+    
+    // More logic here based on our discussed risk factors
+    // Default low risk
+    return {
+      level: "Low",
+      score: 25,
+      factors: ["Task is on track", "No risk factors identified"]
+    };
+  };
+
   const value = {
     tasks,
     setTasks,
     chats,
     setChats,
     updateTaskUrgency,
-    addPurchaseOrder
+    addPurchaseOrder,
+    calculateTaskRisk
   };
   
   return (
