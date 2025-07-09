@@ -31,7 +31,11 @@ const Navbar = () => {
       <nav className="fixed top-0 left-0 right-0 bg-gray-800 border-b border-gray-700 z-50">
         <div className="h-16 flex items-center justify-between">
           <div className="w-[400px] px-6">
-            <span className="text-xl font-bold text-white">SIA</span>
+            <img 
+              src={getImagePath('/assets/img/aiLogo.svg')}
+              alt="SIA"
+              className="h-8"
+            />
           </div>
           <div className="flex items-center">
             <div className="flex items-center space-x-4 px-6">
