@@ -220,21 +220,21 @@ const Task = ({ task }) => {
       </tr>
 
       {/* Always visible compact risk row - with nested appearance and no top border */}
-      <tr 
-        className="bg-gray-850 border-t-0 !border-t-0 border-b border-gray-700 hover:bg-gray-700 transition-colors cursor-pointer"
-        style={{ borderTop: 'none' }}
-        onClick={() => setShowRiskDetails(!showRiskDetails)}
-      >
-        <td colSpan="6" className="py-1 px-6">
-          <div className="flex items-center pl-4 border-l-2" style={{ borderLeftColor: risk.level === "Low" ? "#10B981" : risk.level === "Moderate" ? "#F59E0B" : risk.level === "High" ? "#F97316" : risk.level === "Critical" ? "#EF4444" : "#6B7280" }}>
-            <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-              <span className="text-xs font-medium text-gray-300">
-                {risk.level} Risk 
-              </span>
-              {/* Score display */}
+        <tr 
+          className="bg-gray-850 border-t-0 border-b border-gray-700 hover:bg-gray-700 transition-colors cursor-pointer"
+          style={{ borderTop: 'none' }}
+          onClick={() => setShowRiskDetails(!showRiskDetails)}
+        >
+          <td colSpan="6" className="py-3 px-6" style={{ paddingBottom: '2rem' }}>
+            <div className="flex items-center pl-4 border-l-2" style={{ borderLeftColor: risk.level === "Low" ? "#10B981" : risk.level === "Moderate" ? "#F59E0B" : risk.level === "High" ? "#F97316" : risk.level === "Critical" ? "#EF4444" : "#6B7280" }}>
+          <div className="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <span className="text-xs font-medium text-gray-300">
+              {risk.level} Risk 
+            </span>
+            {/* Score display */}
               <span className="text-xs font-medium text-gray-400 ml-2">
                 Score: {risk.score}/100
               </span>
